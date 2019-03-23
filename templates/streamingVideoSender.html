@@ -1,0 +1,46 @@
+<html>
+
+<head>
+    <title>Sender Streaming Video</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+</head>
+
+<body>
+    <video id="player" controls></video>
+    <p id="printData"></p>
+    <script>
+        var player = document.getElementById('player');
+        var printData = document.getElementById('printData');
+        var count = 0;
+        var connection = new WebSocket(
+            'ws://html5rocks.websocket.org/echo',
+            ['soap', 'xmpp']
+        );
+        var handleSuccess = function (stream) {
+            var context = new AudioContext();
+            var source = context.createMediaStreamSource(stream);
+            var processor = context.createScriptProcessor(1024, 1, 1);
+
+            source.connect(processor);
+            processor.connect(context.destination);
+
+            processor.onaudioprocess = function (e) {
+                // Do something with the data, i.e Convert this to WAV
+                printData.innerHTML = ++count;//Math.random();
+            };
+            if (window.URL) {
+                console.log("~~~" + Math.random());//000000000000000000000000000000000000000000000
+                connection.send(stream);
+                player.srcObject = stream;
+            } else {
+                console.log("---" + Math.random());
+                player.src = stream;
+            }
+        };
+
+        navigator.mediaDevices.getUserMedia({ audio: true, video: true })
+            .then(handleSuccess);
+    </script>
+</body>
+
+</html>
