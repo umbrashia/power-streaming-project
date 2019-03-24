@@ -10,8 +10,7 @@ class StreamingController(system.FlaskServerBinder):
         return flask.Response(response=None,status=404)
     
     def postStream(self):
-        t=5+10
-        return "done again : "+str(t)
-        
+        return "done again : "
+
     def streamingView(self):
         return flask.render_template("streamingVideoSender.html")
