@@ -8,4 +8,5 @@ class StreamingController(system.FlaskServerBinder):
         return flask.Response(response=None,status=404)
     
     def postStream(self):
-        return "done again"
+        t=5+10
+        return "done again : "+str(t)

@@ -12,8 +12,7 @@ def engine(module, subModule, parm1=None, parm2=None):
     system.FlaskServerBinder.setData(module=module,subModule=subModule)
     if module == "streaming":
         return controllers.StreamingController().internalRouting()
-    return "hello"
-
+    return Response(response=None,status=404)
 
 @app.route("/")
 def hello():
@@ -26,4 +25,4 @@ def streamingVideoSender():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()

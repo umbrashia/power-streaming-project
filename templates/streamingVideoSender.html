@@ -12,32 +12,39 @@
         var player = document.getElementById('player');
         var printData = document.getElementById('printData');
         var count = 0;
-        var connection = new WebSocket(
-            'ws://html5rocks.websocket.org/echo',
-            ['soap', 'xmpp']
-        );
+        var connection = new WebSocket('ws://localhost:8765/');
+        function isOpen(ws) { return ws.readyState === ws.OPEN }
+        connection.onmessage = function (evt) {
+            console.log(evt);
+        };
         var handleSuccess = function (stream) {
             var context = new AudioContext();
             var source = context.createMediaStreamSource(stream);
             var processor = context.createScriptProcessor(1024, 1, 1);
+
 
             source.connect(processor);
             processor.connect(context.destination);
 
             processor.onaudioprocess = function (e) {
                 // Do something with the data, i.e Convert this to WAV
-                printData.innerHTML = ++count;//Math.random();
+              //  if (!isOpen(connection)) return;
+                var inputData = [];
+                for (var channel = 0; channel < e.outputBuffer.numberOfChannels; channel++) {
+                    inputData.push(e.inputBuffer.getChannelData(channel));
+                }
+                connection.send(JSON.stringify({ itration: ++count, data: inputData, userId: "123456" }));
             };
             if (window.URL) {
                 console.log("~~~" + Math.random());//000000000000000000000000000000000000000000000
-                connection.send(stream);
+                //connection.send(stream);
                 player.srcObject = stream;
             } else {
                 console.log("---" + Math.random());
                 player.src = stream;
             }
         };
-
+        alert("ss");
         navigator.mediaDevices.getUserMedia({ audio: true, video: true })
             .then(handleSuccess);
     </script>
