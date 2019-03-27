@@ -1,16 +1,39 @@
-import flask,system
+import flask
+import system
+import kafka
+
 
 class StreamingController(system.FlaskServerBinder):
-    
+
     def internalRouting(self):
-        if self.subModule=="hello":
+        if self.subModule == "hello":
             return self.postStream()
-        if self.subModule=="streamingView":
+        if self.subModule == "streamingView":
             return self.streamingView()
-        return flask.Response(response=None,status=404)
-    
+        if self.subModule == "kafkaProCall":
+            return self.kafkaProCall()
+        if self.subModule == "kafkaRecCall":
+            return self.kafkaRecCall()
+        return flask.Response(response=None, status=404)
+
     def postStream(self):
         return "done again : "
 
+    def kafkaProCall(self):
+        
+        proCall=kafka.KafkaProducer()
+        proCall.send(topic="radha",value=b"krishan")
+        return "please check...."
+
+    def kafkaRecCall(self):
+
+        return "please check...."
+
     def streamingView(self):
-        return flask.render_template("streamingVideoSender.html")
+        # local var for use.
+        try:
+            print("hello")
+        except Exception as ex:
+            print(ex.__str__())
+        finally:
+            return flask.render_template("streamingVideoSender.html")
