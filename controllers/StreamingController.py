@@ -23,11 +23,15 @@ class StreamingController(system.FlaskServerBinder):
         
         proCall=kafka.KafkaProducer()
         proCall.send(topic="radha",value=b"krishan")
+        proCall.flush()
         return "please check...."
 
     def kafkaRecCall(self):
-
-        return "please check...."
+        consumer = kafka.KafkaConsumer("radha")
+        prData=""
+        for valu in consumer:
+            print(valu)
+        return "please check.... DATA is : "+prData
 
     def streamingView(self):
         # local var for use.
