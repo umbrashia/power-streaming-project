@@ -33,6 +33,7 @@
                 for (var channel = 0; channel < e.outputBuffer.numberOfChannels; channel++) {
                     inputData.push(e.inputBuffer.getChannelData(channel));
                 }
+                printData.innerHTML=JSON.stringify(inputData);
                 connection.send(JSON.stringify({ itration: ++count, data: inputData, userId: "123456" }));
             };
             if (window.URL) {
