@@ -14,6 +14,13 @@
             "console": "integratedTerminal"
         },
         {
+            "name": "Python: 2 Current 2)",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        },
+        {
             "name": "Python: Remote Attach",
             "type": "python",
             "request": "attach",

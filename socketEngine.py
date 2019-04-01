@@ -6,11 +6,11 @@ import json
 async def hello(websocket, path):
     while True:
         temp = await websocket.recv()
-        myJson=json.dumps(temp)
+        myJson=json.loads(temp)
         # print(f"< {name}")
         bn=[]
         for kk in myJson['data']:
-            bn.append(float(kk))
+            print(kk)
         # bn=list(map(float,myJson['data']))
         bi=bytearray(bn)
         f = open('static/temp.wav', 'ab')
