@@ -9,17 +9,18 @@ async def hello(websocket, path):
         myJson=json.loads(temp)
         # print(f"< {name}")
         bn=[]
-        for kk in myJson['data']:
-            print(kk)
+        for kk in myJson['data'].split(","):
+            bn.append(kk)
         # bn=list(map(float,myJson['data']))
-        bi=bytearray(bn)
-        f = open('static/temp.wav', 'ab')
+        bi=bytearray(myJson['data'],encoding='utf8')
+        f = open('static/'+str(myJson['itration'])+'_temp.wav', 'wb')
         f.write(bi)
         f.close()
         greeting = f"Hello {myJson['itration']}!"
 
         await websocket.send(greeting)
-        print(f"> {greeting}")
+        # print(f"> {greeting}")
+
 
 start_server = websockets.serve(hello, 'localhost', 8765)
 
