@@ -8,15 +8,63 @@
 <body>
     <video id="player" controls></video>
     <device type="media" onchange="update(this.data)"></device>
-
+    <button onclick="startRecording()">Send Sequence Data</button>
     <script>
         function update(stream) {
             document.querySelector('video').src = stream.url;
         }
     </script>
     <p id="printData"></p>
+    <script src="https://cdn.webrtc-experiment.com/MediaStreamRecorder.js"> </script>
     <script>
         var player = document.getElementById('player');
+        var mediaRecorder;
+        var count = 0;
+        var mediaConstraints = {
+            audio: true,
+            video: true
+        };
+
+        var connection = new WebSocket('ws://localhost:8765/');
+        function isOpen(ws) { return ws.readyState === ws.OPEN }
+        connection.onmessage = function (evt) {
+            console.log(evt);
+            mediaRecorder.start(3000);
+        };
+
+        navigator.getUserMedia(mediaConstraints, onMediaSuccess, onMediaError);
+
+        function onMediaSuccess(stream) {
+            mediaRecorder = new MediaStreamRecorder(stream);
+            mediaRecorder.mimeType = 'video/webm';
+            mediaRecorder.ondataavailable = function (blob) {
+                // POST/PUT "Blob" using FormData/XHR2
+                var data = {};
+                data.binary = blob;
+                data.metadata = 'test metadata';
+                data.action = "upload_video";
+                data.itration = ++count;
+                // connection.send(JSON.stringify(data));
+                var blobURL = URL.createObjectURL(blob);
+                var reader = new FileReader();
+                reader.readAsDataURL(blob);
+                reader.onloadend = function () {
+                    base64data = reader.result;
+                    // console.log(base64data);
+                    // window.open(base64data);
+                    document.write(base64data);
+                }
+                
+            };
+            mediaRecorder.start(5000);
+        }
+
+        function onMediaError(e) {
+            console.error('media error', e);
+        }
+    </script>
+    <script>
+        /*var player = document.getElementById('player');
         var printData = document.getElementById('printData');
         var count = 0;
         var streamRecorder;
@@ -25,45 +73,27 @@
         function isOpen(ws) { return ws.readyState === ws.OPEN }
         connection.onmessage = function (evt) {
             console.log(evt);
+            startRecording();
         };
         function startRecording() {
             streamRecorder = webcamstream.record();
-            setTimeout(stopRecording, 10000);
+            setTimeout(stopRecording, 1000);
         }
         function stopRecording() {
             streamRecorder.getRecordedData(postVideoToServer);
         }
         function postVideoToServer(videoblob) {
-
             var data = {};
-            data.video = videoblob;
+            data.binary = videoblob;
             data.metadata = 'test metadata';
             data.action = "upload_video";
-            jQuery.post("http://www.kongraju.in/uploadvideo.php", data, onUploadSuccess);
+            data.itration=++count;
+            connection.send(JSON.stringify(data));
+            //jQuery.post("http://www.kongraju.in/uploadvideo.php", data, onUploadSuccess);
+            // connection.send(JSON.stringify(data));
         }
         var handleSuccess = function (stream) {
-            var context = new AudioContext();
-            // var source = context.createMediaStreamSource(stream);
-            // var processor = context.createScriptProcessor(1024, 1, 1);
-
-
-            // source.connect(processor);
-            // processor.connect(context.destination);
-
-            // processor.onaudioprocess = function (e) {
-            //     // Do something with the data, i.e Convert this to WAV
-            //   //  if (!isOpen(connection)) return;
-            //     var inputData = [];
-            //     for (var channel = 0; channel < e.outputBuffer.numberOfChannels; channel++) {
-            //         inputData.push(e.inputBuffer.getChannelData(channel));
-            //     }
-            //     printData.innerHTML=JSON.stringify(inputData);
-            //     connection.send(JSON.stringify({ itration: ++count, data: inputData.join(","), userId: "123456" }));
-            // };
             if (window.URL) {
-                console.log("~~~" + Math.random());//000000000000000000000000000000000000000000000
-
-                //connection.send(stream);
                 player.srcObject = stream;
                 webcamstream = stream;
             } else {
