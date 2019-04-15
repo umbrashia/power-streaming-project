@@ -8,39 +8,45 @@
 <body>
     <video id="player" controls></video>
     <device type="media" onchange="update(this.data)"></device>
-    <button onclick="startRecording()">Send Sequence Data</button>
+    <button onclick="connection.close()">Close Socket</button>
     <script>
         function update(stream) {
             document.querySelector('video').src = stream.url;
         }
     </script>
     <p id="printData"></p>
-    <script src="https://cdn.webrtc-experiment.com/MediaStreamRecorder.js"> </script>
+    <script src="{{ url_for('static', filename='MediaStreamRecorder.js') }}"> </script>
+    <script src="{{ url_for('static', filename='mediaDevices-getUserMedia-polyfill.js') }}"> </script>
+    <!-- <script src="https://cdn.webrtc-experiment.com/MediaStreamRecorder.js"> </script> -->
     <script>
+        /*
         var player = document.getElementById('player');
-        var mediaRecorder;
+        var mediaRecorder = null;
         var count = 0;
         var mediaConstraints = {
             audio: true,
             video: true
         };
 
+        
         var connection = new WebSocket('ws://localhost:8765/');
         function isOpen(ws) { return ws.readyState === ws.OPEN }
         connection.onmessage = function (evt) {
             console.log(evt);
+            // mediaRecorder.clearOldRecordedFrames();
             mediaRecorder.start(3000);
         };
 
         navigator.getUserMedia(mediaConstraints, onMediaSuccess, onMediaError);
 
         function onMediaSuccess(stream) {
+
             mediaRecorder = new MediaStreamRecorder(stream);
-            mediaRecorder.mimeType = 'video/webm';
+            mediaRecorder.mimeType = 'video/mp4';
             mediaRecorder.ondataavailable = function (blob) {
                 // POST/PUT "Blob" using FormData/XHR2
                 var data = {};
-                data.binary = blob;
+
                 data.metadata = 'test metadata';
                 data.action = "upload_video";
                 data.itration = ++count;
@@ -52,9 +58,17 @@
                     base64data = reader.result;
                     // console.log(base64data);
                     // window.open(base64data);
-                    document.write(base64data);
+                    // document.write(base64data);
+                    data.binary = base64data.replace("data:video/mp4;base64,", "");
+                    if (isOpen(connection)) {
+                        connection.send(JSON.stringify(data));
+                        mediaRecorder.clearOldRecordedFrames();
+                            
+                    }
+                    //mediaRecorder.stop();
+                    // mediaRecorder.start(3000);
                 }
-                
+
             };
             mediaRecorder.start(5000);
         }
@@ -62,6 +76,7 @@
         function onMediaError(e) {
             console.error('media error', e);
         }
+        */
     </script>
     <script>
         /*var player = document.getElementById('player');

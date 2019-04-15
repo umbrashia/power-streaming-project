@@ -19,11 +19,5 @@ def engine(module, subModule, parm1=None, parm2=None):
 def hello():
     return "Hello World!"
 
-
-@app.route("/streamingVideoSender")
-def streamingVideoSender():
-    return render_template("streamingVideoSender.html")
-
-
 if __name__ == '__main__':
     app.run()
