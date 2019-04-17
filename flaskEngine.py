@@ -10,7 +10,6 @@ app = Flask(__name__, template_folder="templates/")
 @app.route('/engine/<module>/<subModule>/<parm1>/<parm2>/')
 def engine(module, subModule, parm1=None, parm2=None):
     system.FlaskServerBinder.setData(module=module,subModule=subModule)
-    
     if module == "streaming":
         return controllers.StreamingController().internalRouting()
     return Response(response=None,status=404)
