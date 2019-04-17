@@ -21,22 +21,14 @@
     <script>
         // set up basic variables for app
 
-        var record = document.querySelector('.record');
-        var stop = document.querySelector('.stop');
-        var soundClips = document.querySelector('.sound-clips');
-        var canvas = document.querySelector('.visualizer');
-        var mainSection = document.querySelector('.main-controls');
 
-        // disable stop button while not recording
-
-        stop.disabled = true;
-
-        // visualiser setup - create web audio api context and canvas
-
-        var audioCtx = new (window.AudioContext || webkitAudioContext)();
-        var canvasCtx = canvas.getContext("2d");
 
         //main block for doing the audio recording
+        var player = document.getElementById('player');
+        var count = 0;
+        var connection = new WebSocket('ws://localhost:8765/');
+        function isOpen(ws) { return ws.readyState === ws.OPEN }
+
 
         if (navigator.mediaDevices.getUserMedia) {
             console.log('getUserMedia supported.');
@@ -45,11 +37,21 @@
             var chunks = [];
 
             var onSuccess = function (stream) {
-                var mediaRecorder = new MediaRecorder(stream);
 
+
+                connection.onmessage = function (evt) {
+                    console.log(evt);
+                    doRecordData();
+                    // mediaRecorder.clearOldRecordedFrames();
+                    // mediaRecorder.start(3000);
+                };
+                var mediaRecorder = new MediaRecorder(stream);
+                player.srcObject = stream;
 
                 function doRecordData() {
+
                     mediaRecorder.start();
+                    setTimeout(doStopAndPost, 3000);
                 }
 
                 function doStopAndPost() {
@@ -57,17 +59,40 @@
                 }
 
                 mediaRecorder.onstop = function (e) {
-                    audio.controls = true;
-                    var blob = new Blob(chunks, { 'type': 'audio/ogg; codecs=opus' });
-                    chunks = [];
-                    var audioURL = window.URL.createObjectURL(blob);
-                    audio.src = audioURL;
-                    console.log("recorder stopped");
+                    let blob = new Blob(chunks, { 'type': 'video/mp4' });
+
+                    //var audioURL = window.URL.createObjectURL(blob);
+
+                    var reader = new FileReader();
+                    reader.readAsDataURL(blob);
+                    reader.onloadend = function () {
+                        let base64data = reader.result;
+                        console.log("recorder stopped : " + base64data);
+                        //------------------------------------------
+                        let data = {};
+                        data.metadata = 'test metadata';
+                        data.action = "upload_video";
+                        data.itration = ++count;
+                        data.binary = base64data.replace("data:video/mp4;base64,", "");
+                        if (isOpen(connection))
+                            connection.send(JSON.stringify(data));
+                        //-----------------------------------
+
+                        chunks = [];
+
+                    }
+
+                    // audio.src = audioURL;
+                    //replace("data:video/mp4;base64,", "");
+
                 }
 
                 mediaRecorder.ondataavailable = function (e) {
                     chunks.push(e.data);
                 }
+
+                setTimeout(doRecordData, 1000);
+
             }
 
             var onError = function (err) {
@@ -79,115 +104,6 @@
         } else {
             console.log('getUserMedia not supported on your browser!');
         }
-    </script>
-    <script>
-        /*
-        var player = document.getElementById('player');
-        var mediaRecorder = null;
-        var count = 0;
-        var mediaConstraints = {
-            audio: true,
-            video: true
-        };
-
-
-        var connection = new WebSocket('ws://localhost:8765/');
-        function isOpen(ws) { return ws.readyState === ws.OPEN }
-        connection.onmessage = function (evt) {
-            console.log(evt);
-            // mediaRecorder.clearOldRecordedFrames();
-            mediaRecorder.start(3000);
-        };
-
-        navigator.getUserMedia(mediaConstraints, onMediaSuccess, onMediaError);
-
-        function onMediaSuccess(stream) {
-
-            mediaRecorder = new MediaStreamRecorder(stream);
-            mediaRecorder.mimeType = 'video/mp4';
-            mediaRecorder.ondataavailable = function (blob) {
-                // POST/PUT "Blob" using FormData/XHR2
-                var data = {};
-
-                data.metadata = 'test metadata';
-                data.action = "upload_video";
-                data.itration = ++count;
-                // connection.send(JSON.stringify(data));
-                var blobURL = URL.createObjectURL(blob);
-                var reader = new FileReader();
-                reader.readAsDataURL(blob);
-                reader.onloadend = function () {
-                    base64data = reader.result;
-                    // console.log(base64data);
-                    // window.open(base64data);
-                    // document.write(base64data);
-                    data.binary = base64data.replace("data:video/mp4;base64,", "");
-                    if (isOpen(connection)) {
-                        connection.send(JSON.stringify(data));
-                        mediaRecorder.clearOldRecordedFrames();
-
-                    }
-                    //mediaRecorder.stop();
-                    // mediaRecorder.start(3000);
-                }
-
-            };
-            mediaRecorder.start(5000);
-        }
-
-        function onMediaError(e) {
-            console.error('media error', e);
-        }
-        */
-    </script>
-    <script>
-        /*var player = document.getElementById('player');
-        var printData = document.getElementById('printData');
-        var count = 0;
-        var streamRecorder;
-        var webcamstream;
-        var connection = new WebSocket('ws://localhost:8765/');
-        function isOpen(ws) { return ws.readyState === ws.OPEN }
-        connection.onmessage = function (evt) {
-            console.log(evt);
-            startRecording();
-        };
-        function startRecording() {
-            streamRecorder = webcamstream.record();
-            setTimeout(stopRecording, 1000);
-        }
-        function stopRecording() {
-            streamRecorder.getRecordedData(postVideoToServer);
-        }
-        function postVideoToServer(videoblob) {
-            var data = {};
-            data.binary = videoblob;
-            data.metadata = 'test metadata';
-            data.action = "upload_video";
-            data.itration=++count;
-            connection.send(JSON.stringify(data));
-            //jQuery.post("http://www.kongraju.in/uploadvideo.php", data, onUploadSuccess);
-            // connection.send(JSON.stringify(data));
-        }
-        var handleSuccess = function (stream) {
-            if (window.URL) {
-                player.srcObject = stream;
-                webcamstream = stream;
-            } else {
-                console.log("---" + Math.random());
-                player.src = stream;
-            }
-        };
-
-
-        alert("ss");
-        if (true)
-            navigator.mediaDevices.getUserMedia({
-                video: {
-                    frameRate: 15
-                }
-            })
-                .then(handleSuccess);
     </script>
 </body>
 
