@@ -27,11 +27,15 @@ class StreamingController(system.FlaskServerBinder):
         return "please check...."
 
     def kafkaRecCall(self):
-        consumer = kafka.KafkaConsumer("radha")
-        prData=""
-        for valu in consumer:
-            print(valu)
-        return "please check.... DATA is : "+prData
+        
+        def generate():
+            consumer = kafka.KafkaConsumer("viom")
+            
+            for valu in consumer:
+                yield bytes(valu)
+        
+        return flask.Response(generate(), mimetype='video/mp4')
+        
 
     def streamingView(self):
         # local var for use.

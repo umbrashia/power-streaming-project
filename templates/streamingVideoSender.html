@@ -73,7 +73,7 @@
                         data.metadata = 'test metadata';
                         data.action = "upload_video";
                         data.itration = ++count;
-                        data.binary = base64data.replace("data:video/mp4;base64,", "");
+                        data.binary = base64data;//.replace("data:video/mp4;base64,", "");
                         if (isOpen(connection))
                             connection.send(JSON.stringify(data));
                         //-----------------------------------
