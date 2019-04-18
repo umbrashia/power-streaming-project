@@ -59,7 +59,7 @@
                 }
 
                 mediaRecorder.onstop = function (e) {
-                    let blob = new Blob(chunks, { 'type': 'video/mp4' });
+                    let blob = new Blob(chunks, { 'type': 'video/ogg; codecs=opus' });
 
                     //var audioURL = window.URL.createObjectURL(blob);
 

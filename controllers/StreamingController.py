@@ -26,14 +26,15 @@ class StreamingController(system.FlaskServerBinder):
         proCall.flush()
         return "please check...."
 
-    def kafkaRecCall(self):
-        
+    def kafkaRecCall(self): 
         def generate():
             consumer = kafka.KafkaConsumer("viom")
-            
             for valu in consumer:
-                yield bytes(valu)
-        
+                f = open("video.mp4", "wb")
+                f.write(valu.value)
+                
+                f.close()
+                exit()
         return flask.Response(generate(), mimetype='video/mp4')
         
 
