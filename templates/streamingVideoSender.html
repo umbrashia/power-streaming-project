@@ -77,7 +77,7 @@
                         data.metadata = 'test metadata';
                         data.action = "upload_video";
                         data.itration = ++count;
-                        data.binary = base64data.replace("data:video/webm;base64,", "");
+                        data.binary = base64data;//.replace("data:video/webm;base64,", "");
                         printData.innerHTML=base64data;
                         if (isOpen(connection))
                             connection.send(JSON.stringify(data));
