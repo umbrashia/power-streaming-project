@@ -2,6 +2,7 @@ import asyncio
 import websockets
 import json
 import kafka
+import base64
 
 
 async def hello(websocket, path):
@@ -12,7 +13,13 @@ async def hello(websocket, path):
         myJson=json.loads(temp)
         
         print("> "+str(myJson['itration']))
+        # ggg=type(myJson['binary'])
         by=bytes(myJson['binary'],encoding='utf-8')
+        # f = open("video.webm", "wb")
+        # fi=base64.b64decode(myJson['binary'])
+        # f.write(fi)
+        
+        # f.close()
         DproCall.send(topic="viom",value=by)
         DproCall.flush()
         greeting = f"Hello {myJson['itration']}!"

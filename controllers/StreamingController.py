@@ -1,6 +1,7 @@
 import flask
 import system
 import kafka
+import base64
 
 
 class StreamingController(system.FlaskServerBinder):
@@ -14,6 +15,8 @@ class StreamingController(system.FlaskServerBinder):
             return self.kafkaProCall()
         if self.subModule == "kafkaRecCall":
             return self.kafkaRecCall()
+        if self.subModule == "player":
+            return self.player()
         return flask.Response(response=None, status=404)
 
     def postStream(self):
@@ -30,13 +33,14 @@ class StreamingController(system.FlaskServerBinder):
         def generate():
             consumer = kafka.KafkaConsumer("viom")
             for valu in consumer:
-                f = open("video.mp4", "wb")
-                f.write(valu.value)
-                
-                f.close()
-                exit()
-        return flask.Response(generate(), mimetype='video/mp4')
+                fi=base64.b64decode(valu.value)
+                yield fi
+                # yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + fi + b'\r\n\r\n')
+                # exit()
+        return flask.Response(generate(), mimetype='video/webm')
         
+    def player(self):
+        return flask.render_template("player.html")
 
     def streamingView(self):
         # local var for use.

@@ -2,7 +2,10 @@
 
 <head>
     <title>Sender Streaming Video</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/jplayer/2.9.2/skin/pink.flag/css/jplayer.pink.flag.min.css" type="text/css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jplayer/2.9.2/jplayer/jquery.jplayer.min.js"></script>
+    
 </head>
 
 <body>
@@ -24,6 +27,7 @@
 
 
         //main block for doing the audio recording
+        var printData = document.getElementById('printData');
         var player = document.getElementById('player');
         var count = 0;
         var connection = new WebSocket('ws://localhost:8765/');
@@ -59,7 +63,7 @@
                 }
 
                 mediaRecorder.onstop = function (e) {
-                    let blob = new Blob(chunks, { 'type': 'video/ogg; codecs=opus' });
+                    let blob = new Blob(chunks, { 'type': 'video/webm' });
 
                     //var audioURL = window.URL.createObjectURL(blob);
 
@@ -67,13 +71,14 @@
                     reader.readAsDataURL(blob);
                     reader.onloadend = function () {
                         let base64data = reader.result;
-                        console.log("recorder stopped : " + base64data);
+                        // console.log(base64data);
                         //------------------------------------------
                         let data = {};
                         data.metadata = 'test metadata';
                         data.action = "upload_video";
                         data.itration = ++count;
-                        data.binary = base64data;//.replace("data:video/mp4;base64,", "");
+                        data.binary = base64data.replace("data:video/webm;base64,", "");
+                        printData.innerHTML=base64data;
                         if (isOpen(connection))
                             connection.send(JSON.stringify(data));
                         //-----------------------------------
