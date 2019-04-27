@@ -28,3 +28,4 @@ C:\kafka\bin\windows>kafka-server-start.bat server.properties (PRESS ENTER FOR E
 good luckkkkkk......<br/>
 Any help please mail me : shantanu34@outlook.com because i think as new every developer it is hard to understand...
 <br>
+And My first priority it is provide response of your mail.
