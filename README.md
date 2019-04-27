@@ -7,15 +7,22 @@ And it is fully free to use any projects i never be charged any thing because li
 <br>
 <h3>Some Small Steps you have to do : </h3>
 <ol>
-    <li></li>
-    <li></li>
-    <li></li>
-    <li></li>
-    <li></li>
-    <li></li>
-    <li></li>
-    <li></li>
-    <li></li>
+    1. Install all freez requirements.
+    2. Install zookeeper And kafka
+    3. Start services of zookeeper And kafka (this is window based OS commands)<br/><small>
+    C:\zookeeper\bin>zkServer.cmd (PRESS ENTER FOR EXECUTE)<br/>
+	C:\kafka\bin\windows>kafka-server-start.bat server.properties (PRESS ENTER FOR EXECUTE)
+
+    <small>
+    4. Python execute flask (flaskEngine.py)
+    5. Python execute sender data to socket. (socketEngine.py)
+    6. Open Url in browser http://127.0.0.1:5000/engine/streaming/streamingView/
+    7. Python execute reciver data to socket. (responseSocketEngine.py)
+    8. Open Url in browser http://127.0.0.1:5000/engine/streaming/player/
+    9. Done Now you LIVE.....
+    
+    
+    
 </ol>
 
 good luckkkkk
