@@ -1,0 +1,128 @@
+<html>
+
+<head>
+    <title>Sender Streaming Video</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/jplayer/2.9.2/skin/pink.flag/css/jplayer.pink.flag.min.css"
+        type="text/css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jplayer/2.9.2/jplayer/jquery.jplayer.min.js"></script>
+    <link href="https://vjs.zencdn.net/7.5.4/video-js.css" rel="stylesheet">
+
+    <!-- If you'd like to support IE8 (for Video.js versions prior to v7) -->
+    <script src="https://vjs.zencdn.net/ie8/1.1.2/videojs-ie8.min.js"></script>
+</head>
+
+<body>
+
+
+    <video width="256" height="192" idRemove="myVideo" controls autoplay>
+        <!-- <source src="" id="mp4Source" type="video/webm"> -->
+        Your browser does not support the video tag.
+    </video>
+    <script src="{{ url_for('static', filename='MediaStreamRecorder.js') }}"> </script>
+    <script src="{{ url_for('static', filename='mediaDevices-getUserMedia-polyfill.js') }}"> </script>
+
+    <script>
+        (async() => {
+
+
+const mediaSource = new MediaSource();
+
+const video = document.querySelector("video");
+
+// video.oncanplay = e => video.play();
+
+const urls = ["https://nickdesaulniers.github.io/netfix/demo/frag_bunny.mp4", "https://raw.githubusercontent.com/w3c/web-platform-tests/master/media-source/mp4/test.mp4"];
+
+const request = url => fetch(url).then(response => response.arrayBuffer());
+
+// `urls.reverse()` stops at `.currentTime` : `9`
+const files = await Promise.all(urls.map(request));
+
+/*
+ `.webm` files
+ Uncaught DOMException: Failed to execute 'appendBuffer' on 'SourceBuffer': This SourceBuffer has been removed from the parent media source.
+ Uncaught DOMException: Failed to set the 'timestampOffset' property on 'SourceBuffer': This SourceBuffer has been removed from the parent media source.
+*/
+// const mimeCodec = "video/webm; codecs=opus";
+// https://stackoverflow.com/questions/14108536/how-do-i-append-two-video-files-data-to-a-source-buffer-using-media-source-api/
+const mimeCodec = "video/webm;codecs=vp9";
+
+
+const media = await Promise.all(files.map(file => {
+  return new Promise(resolve => {
+    let media = document.createElement("video");
+    let blobURL = URL.createObjectURL(new Blob([file]));
+    media.onloadedmetadata = async e => {
+      resolve({
+        mediaDuration: media.duration,
+        mediaBuffer: file
+      })
+    }
+    media.src = blobURL;
+  })
+}));
+
+console.log(media);
+
+mediaSource.addEventListener("sourceopen", sourceOpen);
+
+video.src = URL.createObjectURL(mediaSource);
+
+async function sourceOpen(event) {
+
+  if (MediaSource.isTypeSupported(mimeCodec)) {
+    const sourceBuffer = mediaSource.addSourceBuffer(mimeCodec);
+
+    for (let chunk of media) {
+      await new Promise(resolve => {
+        sourceBuffer.appendBuffer(chunk.mediaBuffer);
+        sourceBuffer.onupdateend = e => {
+          sourceBuffer.onupdateend = null;
+          sourceBuffer.timestampOffset += chunk.mediaDuration;
+          console.log(mediaSource.duration);
+          resolve()
+        }
+      })
+
+    }
+
+    mediaSource.endOfStream();
+
+  }  
+  else {
+    console.warn(mimeCodec + " not supported");
+  }
+};
+
+
+
+})()
+    </script>
+
+
+<script type='text/javascript'>
+    var count = 0;
+    // var player = document.getElementById('myVideo');
+    // var mp4Vid = document.getElementById('mp4Source');
+    var connection = new WebSocket('ws://localhost:8766/');
+    function isOpen(ws) { return ws.readyState === ws.OPEN }
+    // player.addEventListener('ended', myHandler, false);
+
+    connection.onmessage = function (evt) {
+        // console.log(evt);
+        videoData.push(evt.data);
+        
+    };
+    function myHandler(e) {
+
+        
+    }
+    connection.onopen = function (e) {
+        connection.send("test");
+    }
+</script>
+
+</body>
+
+</html>
